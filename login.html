@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ล็อกอิน - {{SYSTEM_NAME}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+    <style>
+        :root {
+            --primary-color: {{THEME_COLOR}};
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .login-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 420px;
+            width: 100%;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            filter: brightness(90%);
+        }
+        .error {
+            color: #F44336;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        .loading {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        .loading-content p {
+            color: var(--primary-color);
+        }
+        .loading-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .login-tab {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-bottom: 3px solid transparent;
+            color: #6B7280;
+        }
+        .login-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        .login-form-content {
+            display: none;
+        }
+        .login-form-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="py-4" style="background-color: {{THEME_LIGHT_COLOR}};">
+        <div class="container mx-auto px-4 flex flex-col items-center">
+            <img src="{{LOGO_URL}}" alt="โลโก้โรงเรียน" class="h-32 max-w-full">
+            <h1 class="text-2xl font-bold mt-2 text-center">{{HEADER_TEXT}}</h1>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center px-4 py-6">
+        <div class="login-container">
+            <div class="flex border-b mb-6">
+                <div id="teacher-tab" class="login-tab active flex-1 text-center">สำหรับครู/ผู้ดูแลระบบ</div>
+                <div id="student-tab" class="login-tab flex-1 text-center">สำหรับนักเรียน</div>
+            </div>
+
+            <div id="teacher-form-content" class="login-form-content active">
+                <h2 class="text-xl font-bold mb-6 text-center text-gray-800">ล็อกอินสำหรับครู/ผู้ดูแลระบบ</h2>
+                <form id="login-form">
+                    <div class="mb-4">
+                        <label for="username" class="block text-gray-700 mb-2">ชื่อผู้ใช้</label>
+                        <input type="text" id="username" name="username" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-gray-700 mb-2">รหัสผ่าน</label>
+                        <input type="password" id="password" name="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2" required>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <button type="submit" class="btn-primary px-6 py-2 rounded-lg w-full">เข้าสู่ระบบ</button>
+                    </div>
+                    <div class="text-center">
+                        <a href="#" id="forgot-password" class="hover:underline text-sm">ลืมรหัสผ่าน? (สำหรับครู)</a>
+                    </div>
+                </form>
+            </div>
+
+            <div id="student-form-content" class="login-form-content">
+                <h2 class="text-xl font-bold mb-6 text-center text-gray-800">นักเรียนตรวจสอบข้อมูลการเข้าเรียน</h2>
+                <form id="student-login-form">
+                    <div class="mb-6">
+                        <label for="student-id" class="block text-gray-700 mb-2">กรุณากรอกรหัสนักเรียน</label>
+                        <input type="text" id="student-id" name="student-id" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2" required>
+                    </div>
+                    <div class="mb-4">
+                        <button type="submit" class="btn-primary px-6 py-2 rounded-lg w-full">ตรวจสอบข้อมูล</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-4 border-t" style="background-color: {{THEME_LIGHT_COLOR}};">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>{{FOOTER_TEXT}}</p>
+        </div>
+    </footer>
+
+    <div id="loading-overlay" class="loading">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p class="mt-2">กำลังประมวลผล...</p>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            console.log('Showing loading overlay');
+            document.getElementById('loading-overlay').style.display = 'block';
+        }
+
+        function hideLoading() {
+            console.log('Hiding loading overlay');
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function handleError(error) {
+            hideLoading();
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: error.message || 'ไม่สามารถดำเนินการได้ กรุณาลองใหม่',
+                confirmButtonColor: 'var(--primary-color)'
+            });
+        }
+        
+        function waitForGoogleScriptRun(callback) {
+            if (window.google && google.script && google.script.run) {
+                callback();
+            } else {
+                setTimeout(() => waitForGoogleScriptRun(callback), 100);
+            }
+        }
+
+        $(document).ready(function() {
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+            const themeMap = {
+                '#FF69B4': { light: '#fbcfe8' },
+                '#2196F3': { light: '#bbdefb' },
+                '#3F51B5': { light: '#c5cae9' },
+                '#4CAF50': { light: '#c8e6c9' },
+                '#FFC107': { light: '#fff9c4' },
+                '#9C27B0': { light: '#e1bee7' },
+                '#FF9800': { light: '#ffe0b2' },
+                '#F44336': { light: '#ffcdd2' }
+            };
+            const lightColor = themeMap[primaryColor] ? themeMap[primaryColor].light : '#fbcfe8';
+
+            // อัปเดตสี header และ footer ทันที
+            $('header, footer').css('background-color', lightColor);
+            $('#forgot-password').css('color', primaryColor);
+            $('input').on('focus', function() {
+                $(this).css('border-color', primaryColor);
+                $(this).css('box-shadow', `0 0 0 2px ${primaryColor}60`);
+            }).on('blur', function() {
+                $(this).css('border-color', '');
+                $(this).css('box-shadow', 'none');
+            });
+            
+            // --- LOGIC การสลับ TAB ---
+            $('#teacher-tab').click(function() {
+                $(this).addClass('active');
+                $('#student-tab').removeClass('active');
+                $('#teacher-form-content').addClass('active');
+                $('#student-form-content').removeClass('active');
+            });
+
+            $('#student-tab').click(function() {
+                $(this).addClass('active');
+                $('#teacher-tab').removeClass('active');
+                $('#student-form-content').addClass('active');
+                $('#teacher-form-content').removeClass('active');
+            });
+
+            // --- FORM สำหรับครู/ADMIN ---
+            $('#login-form').validate({
+                rules: {
+                    username: { required: true, minlength: 3 },
+                    password: { required: true, minlength: 6 }
+                },
+                messages: {
+                    username: { required: "กรุณากรอกชื่อผู้ใช้", minlength: "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร" },
+                    password: { required: "กรุณากรอกรหัสผ่าน", minlength: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }
+                },
+                errorElement: 'div', 
+                errorClass: 'error',
+                errorPlacement: function(error, element) { error.insertAfter(element); },
+                submitHandler: function(form) {
+                    const username = $('#username').val().trim();
+                    const password = $('#password').val().trim();
+                    showLoading();
+                    waitForGoogleScriptRun(() => {
+                        google.script.run
+                            .withSuccessHandler(function(result) {
+                                hideLoading();
+                                sessionStorage.setItem('user', JSON.stringify(result.user));
+                                sessionStorage.setItem('initialData', JSON.stringify(result.initialData));
+                                document.open();
+                                document.write(result.htmlContent);
+                                document.close();
+                            })
+                            .withFailureHandler(handleError)
+                            .loginAndLoad(username, password);
+                    });
+                }
+            });
+
+            // --- FORM สำหรับนักเรียน ---
+            $('#student-login-form').validate({
+                rules: {
+                    'student-id': { required: true }
+                },
+                messages: {
+                    'student-id': { required: "กรุณากรอกรหัสนักเรียน" }
+                },
+                errorElement: 'div',
+                errorClass: 'error',
+                errorPlacement: function(error, element) { error.insertAfter(element); },
+                submitHandler: function(form) {
+                    const studentId = $('#student-id').val().trim();
+                    showLoading();
+                    waitForGoogleScriptRun(() => {
+                        google.script.run
+                            .withSuccessHandler(function(result) {
+                                hideLoading();
+                                sessionStorage.setItem('user', JSON.stringify(result.user));
+                                sessionStorage.setItem('initialData', JSON.stringify(result.initialData));
+                                document.open();
+                                document.write(result.htmlContent);
+                                document.close();
+                            })
+                            .withFailureHandler(handleError)
+                            .studentLoginAndLoad(studentId); // เรียกฟังก์ชันใหม่สำหรับนักเรียน
+                    });
+                }
+            });
+
+            $('#forgot-password').click(function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'รีเซ็ตรหัสผ่าน',
+                    text: 'กรุณากรอกชื่อผู้ใช้ของคุณ',
+                    input: 'text',
+                    inputPlaceholder: 'ชื่อผู้ใช้',
+                    showCancelButton: true,
+                    confirmButtonText: 'ส่งคำขอ',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: 'var(--primary-color)',
+                    cancelButtonColor: '#6c757d',
+                    inputValidator: (value) => { if (!value) { return 'กรุณากรอกชื่อผู้ใช้'; } }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showLoading();
+                        waitForGoogleScriptRun(() => {
+                            google.script.run
+                                .withSuccessHandler(function() {
+                                    hideLoading();
+                                    Swal.fire({
+                                        icon: 'success', 
+                                        title: 'สำเร็จ!',
+                                        text: 'คำขอรีเซ็ตรหัสผ่านถูกส่งแล้ว กรุณาติดต่อผู้ดูแลระบบ',
+                                        confirmButtonColor: 'var(--primary-color)'
+                                    });
+                                })
+                                .withFailureHandler(handleError)
+                                .requestPasswordReset(result.value.trim());
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
